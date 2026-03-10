@@ -1,4 +1,5 @@
 from unittest import result
+import time
 
 P10 = [3, 5, 2, 7, 4, 10, 1, 9, 8, 6]
 P8 = [6, 3, 7, 4, 8, 5, 10, 9]
@@ -114,6 +115,33 @@ def decrypt_text(encrypted_bits, key):
     decrypted_bits = [decrypt_block(b, K1, K2) for b in encrypted_bits]
     return bits_to_text(decrypted_bits)
 
+def brute_force(plaintext, ciphertext):
+    start = time.time()
+    for i in range(1024):
+        key = format(i, '010b')
+        K1, K2 = generate_keys(key)
+        test = encrypt_block(plaintext, K1, K2)
+        if test == ciphertext:
+            end = time.time()
+            print("Можливий ключ:", key)
+            print("Час:", end-start)
+            return
+
+
+def brute_force_text(cipher_bits, expected_text):
+    start = time.time()
+    for i in range(1024):
+        key = format(i, '010b')
+        decrypted = decrypt_text(cipher_bits, key)
+        if decrypted == expected_text:
+            end = time.time()
+            print("Ключ знайдено:", key)
+            print("Розшифрований текст:", decrypted)
+            print("Перебрано ключів:", i+1)
+            print("Час:", end - start)
+            return
+
+    print("Ключ не знайдено")
 
 if __name__ == '__main__':
     key = "1010000010"
@@ -165,3 +193,21 @@ if __name__ == '__main__':
     print("Відкритий текст:", text3)
     print("Зашифрований (біти):", ' '.join(encrypted3))
     print("Розшифрований текст:", decrypted3)
+
+    print("\nBrute Force атака")
+    key4 = "0010100111"
+    plaintext2 = "10000111"
+
+    K1, K2 = generate_keys(key4)
+    cipher = encrypt_block(plaintext2, K1, K2)
+
+    brute_force(plaintext2, cipher)
+
+    print("\nBrute Force атака (для тексту)")
+
+    text_attack = "hard"
+    key_attack = "0010010111"
+
+    encrypted_attack = encrypt_text(text_attack, key_attack)
+    print("Зашифрований текст (біти):", ' '.join(encrypted_attack))
+    brute_force_text(encrypted_attack, text_attack)
